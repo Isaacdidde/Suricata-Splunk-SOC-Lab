@@ -1,0 +1,129 @@
+splunk:
+  overview:
+    description: >
+      Splunk was used as the central log aggregation, monitoring, and analysis
+      platform in the SOC homelab. It ingests Suricata logs and provides
+      searchable, visualized security insights.
+    role_in_lab:
+      - Centralized log monitoring
+      - Alert correlation
+      - SOC-style investigation
+      - Visualization and reporting
+
+  installation:
+    platform: Linux
+    installation_method: Package-based installation
+    service_name: splunk
+    splunk_home: /opt/splunk
+
+  important_paths:
+    splunk_home: /opt/splunk
+    inputs_config: /opt/splunk/etc/system/local/inputs.conf
+    indexes_config: /opt/splunk/etc/system/local/indexes.conf
+    logs_directory: /opt/splunk/var/log/splunk/
+
+  service_management:
+    start:
+      command: sudo /opt/splunk/bin/splunk start
+    stop:
+      command: sudo /opt/splunk/bin/splunk stop
+    restart:
+      command: sudo /opt/splunk/bin/splunk restart
+    status:
+      command: sudo /opt/splunk/bin/splunk status
+
+  log_ingestion:
+    source:
+      description: Suricata eve.json structured logs
+      log_path: /var/log/suricata/eve.json
+    input_type: File monitor
+    index_name: suricata
+    sourcetype: suricata:json
+    ingestion_method:
+      - Monitor eve.json file
+      - Parse JSON events
+      - Index events for searching and dashboards
+
+  verification:
+    steps:
+      - Confirm Splunk service is running
+      - Verify eve.json file is accessible
+      - Search index for incoming events
+    sample_check:
+      search: index=suricata
+      expected_result: Events visible in Splunk search
+
+  common_search_queries:
+    view_all_events:
+      query: index=suricata
+      description: View all Suricata events
+    alerts_only:
+      query: index=suricata event_type=alert
+      description: View IDS alerts
+    drops_only:
+      query: index=suricata event_type=drop
+      description: View IPS drop events
+    top_source_ips:
+      query: index=suricata | stats count by src_ip | sort -count
+      description: Identify top attacking source IPs
+    severity_distribution:
+      query: index=suricata | stats count by alert.severity
+      description: View alert severity distribution
+
+  dashboards:
+    purpose:
+      - Visualize alert trends
+      - Identify top attackers
+      - Monitor IPS activity
+    panels:
+      - Alert count over time
+      - Top source IPs
+      - Top destination IPs
+      - Severity breakdown
+    benefit: Quick SOC-style situational awareness
+
+  correlation_workflow:
+    steps:
+      - Detect suspicious traffic using Suricata
+      - Log events to eve.json
+      - Ingest logs into Splunk
+      - Search and visualize events
+      - Correlate with Wireshark packet captures
+
+  automation_support:
+    integration:
+      - Bash scripts generate formatted reports
+      - Logs consumed by Splunk for indexing
+    benefit:
+      - Reduced manual log inspection
+      - Faster alert triage
+      - Repeatable SOC workflows
+
+  security_use_cases:
+    - Port scanning detection
+    - Suspicious connection monitoring
+    - IPS drop verification
+    - Source and destination IP analysis
+    - Alert severity prioritization
+
+  learning_outcomes:
+    technical_skills:
+      - Splunk log ingestion and indexing
+      - JSON-based event analysis
+      - SOC-style search queries
+      - Dashboard creation and usage
+    operational_skills:
+      - Log correlation
+      - Incident investigation workflow
+      - Tool integration mindset
+
+  limitations:
+    notes:
+      - Lab-scale deployment
+      - No production threat feeds
+      - Focused on learning and validation
+
+  disclaimer:
+    statement: >
+      This Splunk setup is used strictly for educational and defensive security
+      testing within a controlled lab environment.
